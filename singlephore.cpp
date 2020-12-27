@@ -37,7 +37,7 @@ void cond_init (condvar * c) {
 }
 // Signal the condition variable
 void cond_signal (condvar * c) {
-    c->m.lock();
+    mutex_lock(c->m);
     // I want to get in to this code iff there are threads that waiting
     if(c->counter > 0){
         // MIN_INT is the min value integer can get
@@ -45,7 +45,7 @@ void cond_signal (condvar * c) {
         // this thread is now no longer waiting, so i need to dec the number of waiting threads
         --c->counter;
     }
-    c->m.unlock();
+    mutex_unlock(c->m);
 }
 // Block until the condition variable is signaled. The mutex m must be locked by the
 // current thread. It is unlocked before the wait begins and re-locked after the wait
@@ -55,14 +55,14 @@ void cond_signal (condvar * c) {
 // signal (i.e., wake up).
 void cond_wait (condvar * c, mutex * m) {
     // i need to inc the number of waiting threads
-    c->m.lock();
+    mutex_lock(c->m);
     ++c->counter;
-    c->m.unlock();
+    mutex_unlock(c->m);
     // now i need to wait, according to the notes, i need to unlock m, and relocked it after the wait ends
-    m->unlock();
+    mutex_unlock(m);
     // the wait ends when h->val == 1, and then we need to set h->val == 0
     H(&(c->h), 1, -1);
-    m->lock();
+    mutex_lock(m);
 }
 
 
