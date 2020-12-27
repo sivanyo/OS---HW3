@@ -1,7 +1,7 @@
 //
 // Created by sivan on 12/26/2020.
 //
-struct pope_mutex {
+struct pipe_mutex {
     int fd[2];
 
     pipe_mutex() {
@@ -25,6 +25,7 @@ struct pope_mutex {
 
 
 struct mutex_pipe {
+    std::mutex mut;
 /* 1*/      char bbuf_[BUFSIZ];
 /* 2*/      size_t bpos_;
 /* 3*/      size_t blen_;
@@ -36,7 +37,14 @@ struct mutex_pipe {
 
     // Read up to `sz` bytes from this mutex_pipe into `buf` and return the number of bytes
     // read. If no bytes are available, wait until at least one byte can be read.
-    ssize_t read(char* buf, size_t sz) {
+    ssize_t read(char *buf, size_t sz) {
+        this->mut.lock();
+        while (this->blen_ == 0 && sz != 0) {
+            // if we haven't finish reading chars, its a chance for other threads to run
+            this->mut.unlock();
+            sched_yield();
+            this->mut.lock();
+        }
 /* 6*/           size_t pos = 0;
 /* 7*/           while (pos < sz && (pos == 0 || this->blen_ != 0)) {
 /* 8*/               if (this->blen_ != 0) {
@@ -47,12 +55,20 @@ struct mutex_pipe {
 /*13*/                   ++pos;
 /*14*/               }
 /*15*/           }
+        this->mut.unlock();
 /*16*/           return pos;
     }
 
     // Write up to `sz` bytes from `buf` into this mutex_pipe and return the number of bytes
     // written. If no space is available, wait until at least one byte can be written.
-    ssize_t write(const char* buf, size_t sz) {
+    ssize_t write(const char *buf, size_t sz) {
+        this->mut.lock();
+        while (this->blen_ == BUFSIZ && sz != 0) {
+            // if we haven't finish writing chars, its a chance for other threads to run
+            this->mut.unlock();
+            sched_yield();
+            this->mut.lock();
+        }
 /*17*/          size_t pos = 0;
 /*18*/          while (pos < sz && (pos == 0 || this->blen_ < BUFSIZ)) {
 /*19*/              if (this->blen_ != BUFSIZ) {
@@ -63,6 +79,7 @@ struct mutex_pipe {
 /*24*/                  ++pos;
 /*25*/              }
 /*26*/          }
+        this->mut.unlock();
 /*27*/          return pos;
     }
 };
