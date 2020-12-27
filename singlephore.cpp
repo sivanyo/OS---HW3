@@ -60,8 +60,8 @@ void cond_wait (condvar * c, mutex * m) {
     mutex_unlock(c->m);
     // now i need to wait, according to the notes, i need to unlock m, and relocked it after the wait ends
     mutex_unlock(m);
-    // the wait ends when h->val == 1, and then we need to set h->val == 0
-    H(&(c->h), 1, -1);
+    // the wait ends when h->val == 0, and then we need to set h->val == -1
+    H(&(c->h), 0, -1);
     mutex_lock(m);
 }
 
