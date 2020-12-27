@@ -101,7 +101,7 @@ void H(singlephore *h, int bound, int delta) {
         if (h->value >= it->bound) {
             // got here - means this thread needs to be signaled
             it->cond_vector.cond_signal();
-            // need to erase it frome the waiters vector because it is no longer waiting
+            // need to erase it from the waiters vector because it is no longer waiting
             it = h->hwaiters.erase(it);
         } else {
             // this thread needs to keep waiting, need to check next thread
