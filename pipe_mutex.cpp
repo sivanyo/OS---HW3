@@ -6,7 +6,6 @@ struct pipe_mutex {
 
     pipe_mutex() {
         int r = pipe(this->fd);
-        assert(r == 0);
         ssize_t n = write(this->fd, "!", 1);
         assert(n == 1);
     }
