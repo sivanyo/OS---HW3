@@ -74,7 +74,7 @@ void cond_wait(condvar *c, mutex *m) {
 //Q2 part 4 - BONUS
 typedef struct singlephore_waiter {
     int bound;
-    std::condition_variable_any cond_vector;
+    cont_t cond_vector;
 } singlefore_waiter;
 
 typedef struct singlephore {
@@ -88,7 +88,7 @@ void H(singlephore *h, int bound, int delta) {
     singlefore_waiter hwaiter;
     hwaiter.bound = bound;
     // lock
-    mutex_init(h->m);
+    mutex_lock(h->m);
     // instead of the atomic block, we push the thread to the waiting threads vector
     while (h->value < bound) {
         h->waiters.push_back(&hwaiter);
