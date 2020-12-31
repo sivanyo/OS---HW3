@@ -67,7 +67,7 @@ void cond_wait(condvar *c, mutex *m) {
     // now i need to wait, according to the notes, i need to unlock m, and relocked it after the wait ends
     mutex_unlock(m);
     // the wait ends when h->val == 0, and then we need to set h->val == -1
-    H(&(c->h), 0, -1);
+    H(&(c->h), 1, -1);
     mutex_lock(m);
 }
 
@@ -80,7 +80,7 @@ typedef struct singlephore_waiter {
 typedef struct singlephore {
     std::mutex m;
     int value = 0;
-    std::vector<hemiphore_waiter> hwaiters;
+    std::vector<singlefore_waiter> hwaiters;
 } singlefore;
 
 void H(singlephore *h, int bound, int delta) {
