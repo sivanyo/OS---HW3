@@ -28,6 +28,14 @@ public:
     }
 
     wait() {
-        while (working != 0) {}
+        pthread_mutex_lock(&mutex);
+        while (working != 0) {
+            pthread_mutex_unlock(&mutex);
+            /** opportunity for other threads to continue running and not block the program
+             *  this will allow the wait to be more efficient and also avoid the race conditions
+             *  regarding the working counter that existed in the previous implementation */
+            pthread_mutex_lock(&mutex);
+        }
+        pthread_mutex_unlock(&mutex);
     }
 };
