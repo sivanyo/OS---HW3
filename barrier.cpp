@@ -2,34 +2,38 @@
 // Created by 1912m on 04/01/2021.
 //
 
-class Barrier {
+class Barrier
+{
 private:
     pthread_mutex_t mutex;
     int working;
+
 public:
-    Barrier() {
+    Barrier()
+    {
         working = 0;
-        pthread_mutexattr_t attribute;
-        pthread_mutexattr_init(&attribute);
-        pthread_mutexattr_settype(&attribute, PTHREAD_MUTEX_ERRORCHECK);
-        pthread_mutex_init(&mutex, &attribute);
+        pthread_mutex_init(&mutex, NULL);
     }
 
-    increase() {
+    increase()
+    {
         pthread_mutex_lock(&mutex);
         working++;
         pthread_mutex_unlock(&mutex);
     }
 
-    decrease() {
+    decrease()
+    {
         pthread_mutex_lock(&mutex);
         working--;
         pthread_mutex_unlock(&mutex);
     }
 
-    wait() {
+    wait()
+    {
         pthread_mutex_lock(&mutex);
-        while (working != 0) {
+        while (working != 0)
+        {
             pthread_mutex_unlock(&mutex);
             /** opportunity for other threads to continue running and not block the program
              *  this will allow the wait to be more efficient and also avoid the race conditions
